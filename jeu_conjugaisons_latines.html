@@ -1,0 +1,65 @@
+
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jeu des conjugaisons latines</title>
+<style>
+body{font-family:Arial,sans-serif;margin:10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:20px}
+.slot{border:2px dashed #999;min-height:55px;padding:4px}
+.card{background:#eef;border:1px solid #555;padding:6px;margin:4px;border-radius:6px;cursor:move}
+#cards{display:flex;flex-wrap:wrap;gap:6px}
+button{padding:10px}
+</style></head><body>
+<h2>Reconstitue les tableaux</h2>
+<p>Place une vignette de la 1re colonne dans la première case d'une ligne, puis retrouve les 3 vignettes correspondantes.</p>
+<div id="board"></div>
+<button onclick="check()">Vérifier</button>
+<div id="result"></div>
+<h3>Vignettes</h3>
+<div id="cards"></div>
+<script>
+const rows=[['Infinitif présent actif', 'R1 (+ e) + re', 'Mittere', 'Envoyer'], ['Indicatif présent actif', 'R1 (+ i/u) + o, s, t, mus, tis, nt', 'Mittit', 'Il envoie'], ['Indicatif présent passif', 'R1 (+ i/u) + or, ris, tur, mur, mini, ntur', 'Mittitur', 'Il est envoyé'], ['Indicatif imparfait actif', 'R1 + (e)ba + m, s, t, mus, tis, nt', 'Mittebat', 'Il envoyait'], ['Indicatif imparfait passif', 'R1 + (e)ba + r, ris, tur, mur, mini, ntur', 'Mittebatur', 'Il était envoyé'], ['Subjonctif imparfait actif', 'Infinitif présent + m, s, t, mus, tis, nt', 'Cum mitteret', 'Alors qu’il envoyait'], ['Subjonctif imparfait passif', 'Infinitif présent + r, ris, tur, mur, mini, ntur', 'Cum mitteretur', 'Alors qu’il était envoyé'], ['Indicatif parfait actif', 'R2 + i, isti, it, imus, istis, erunt', 'Misit', 'Il a envoyé/envoya'], ['Indicatif parfait passif', 'R3 + us, a, um + sum, es, est', 'Missus, a, um est', 'Il a été envoyé/fut envoyé'], ['Indicatif plus-que-parfait actif', 'R2 + era + m, s, t, mus, tis, nt', 'Miserat', 'Il avait envoyé'], ['Indicatif plus-que-parfait passif', 'R3 + us, a, um + eram, eras, erat', 'Missus, a, um erat', 'Il avait été envoyé'], ['Subjonctif plus-que-parfait actif', 'R2 + isse + m, s, t, mus, tis, nt', 'Cum misisset', 'Alors qu’il avait envoyé'], ['Subjonctif plus-que-parfait passif', 'R3 + us, a, um + essem, esses, esset', 'Cum missus, a, um esset', 'Alors qu’il avait été envoyé'], ['Participe parfait passif', 'R3 + us, a, um', 'Missus, a, um', '(Ayant été) envoyé']];
+const cards=[];
+rows.forEach((r,i)=>r.forEach((t,j)=>cards.push({text:t,row:i,col:j})));
+cards.sort(()=>Math.random()-0.5);
+
+const board=document.getElementById('board');
+for(let i=0;i<rows.length;i++) {
+ let g=document.createElement('div'); g.className='grid';
+ for(let j=0;j<4;j++) {
+  let s=document.createElement('div'); s.className='slot';
+  s.dataset.row=i; s.dataset.col=j;
+  s.ondragover=e=>e.preventDefault();
+  s.ondrop=drop;
+  g.appendChild(s);
+ }
+ board.appendChild(g);
+}
+
+const container=document.getElementById('cards');
+cards.forEach((c,k)=>{
+ let d=document.createElement('div');
+ d.className='card'; d.draggable=true;
+ d.id='c'+k; d.textContent=c.text;
+ d.dataset.row=c.row; d.dataset.col=c.col;
+ d.ondragstart=e=>e.dataTransfer.setData('text',d.id);
+ container.appendChild(d);
+});
+
+function drop(e){
+ e.preventDefault();
+ const el=document.getElementById(e.dataTransfer.getData('text'));
+ e.currentTarget.appendChild(el);
+}
+
+function check(){
+ let ok=0,total=0;
+ document.querySelectorAll('.slot').forEach(s=>{
+   if(s.firstChild){
+      total++;
+      if(+s.firstChild.dataset.row===+s.dataset.row && +s.firstChild.dataset.col===+s.dataset.col) ok++;
+   }
+ });
+ document.getElementById('result').innerHTML=`${ok} bonnes cases sur ${56}.`;
+}
+</script></body></html>
